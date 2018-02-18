@@ -11,14 +11,25 @@ import UIKit
 class TodolistViewController: UITableViewController {
 
     
-    var itemArray = ["Find Bobby", "Buy Cookies", "Destroy honey"]
+    var itemArray = [Item]()
     
     let defaults = UserDefaults.standard //after (//MARK - Add New Items)
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let newItem = Item()
+        newItem.title = "Find Bobby"
+        itemArray.append(newItem)
+        
+        let newItem2 = Item()
+        newItem2.title = "Find Minions"
+        itemArray.append(newItem2)
+        
+        let newItem3 = Item()
+        newItem3.title = "Find Dylan"
+        itemArray.append(newItem3)
         // This is persisting data
-        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
             itemArray = items
         }
     }
@@ -35,9 +46,15 @@ class TodolistViewController: UITableViewController {
         
         //let cell = UITableViewCell(style: default, reuseIdentifier: "ToDoItemCell") // (2.1)
         
+        let item = itemArray[indexPath.row]
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath) // (2.1)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        
+        //Ternary operator ==>
+        //value = Condition ? valueIfTrue : valueIfFalse
+        cell.accessoryType = item.done ? .checkmark : .none
         
         return cell
     }
@@ -47,11 +64,15 @@ class TodolistViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //print (itemArray[indexPath.row])
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done //set 對反 （check = uncheck）這是新版
+        
+//        if itemArray[indexPath.row].done == false {
+//            itemArray[indexPath.row].done = true
+//        } else {
+//            itemArray[indexPath.row].done = false
+//        } //這是舊的版本，只供參考
+        
+        tableView.reloadData()
         
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -65,12 +86,15 @@ class TodolistViewController: UITableViewController {
         
         var textField = UITextField()//6
         
+        let newItem = Item()
+        newItem.title = textField.text!
+        
         //1-Create new Alert
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         //2-Create New Action
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //what will happend once the user click the Add Item button on our UIAlert
-            self.itemArray.append(textField.text!)
+            self.itemArray.append(newItem)
             
             self.defaults.setValue(self.itemArray, forKey: "TodoListArray")
             
